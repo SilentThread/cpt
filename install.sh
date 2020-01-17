@@ -1,27 +1,46 @@
 #!/usr/bin/env bash
 
-
-if [ -d "$1" ]; then
-	instdir="$1"
-else
-	echo "error: dir does not exist. [usage: install INSTALL_DIR DATA_ARCHIVE]"
-	exit 1
+if [ $UID -ne 0 ]; then
+	echo -e "\e[40;95m--- run with a root privilege\e[0m"
+	exit
 fi
 
-if [ -e "$2" ]; then
-	echo -e "\e[40;93mUnpacking...\e[0m"
-	tar -axf $2 -C $instdir || exit 1
-#	gtk-update-icon-cache /usr/share/icons/hicolor
+if [ ! -f "$1" ]; then
+	echo -e "\e[40;96m--- can not find an install archive. (try \"[sudo] ./install.sh ARCHIVE_FILE]\")"
+	exit
 fi
 
 
+
+instdir="/opt"
+while read -p $'\n Enter destination dir (default=/opt) : ' instdir0
+do
+	if [ -z "$instdir0" ]; then
+		break
+	elif [ -d "$instdir0" ]; then
+		instdir="$instdir0"
+		break
+	else
+		echo -e "\e[31m--- dir does not exit.\e[0m"
+	fi
+done
+echo -e "\e[40;36m--- using $instdir\e[0m"
+
+
+
+echo -e "\e[40;93m--- Unpacking...\e[0m"
+tar -axf $1 -P -C $instdir || exit 1
+# gtk-update-icon-cache /usr/share/icons/hicolori
+
+
+
+echo -e "\e[40;93m--- Updating config...\e[0m"
 cat > /etc/profile.d/packettracer.sh <<- TRACER
 
 	export PT7HOME=$instdir/pt
 	export QT_DEVICE_PIXEL_RATIO=auto
 
 TRACER
-
 
 cat > /usr/share/applications/cisco-pt7.desktop <<- CPT
 	[Desktop Entry]
@@ -47,28 +66,32 @@ update-desktop-database /usr/share/applications
 ln -sf $instdir/pt/packettracer /usr/local/bin/packettracer
 
 #mkdir -p /usr/lib64/packettracer
-
 #cp $(dirname $BASH_SOURCE)/lib/* /usr/lib64/packettracer/
 #ln -srf /usr/lib64/packettracer/libdouble-conversion.so.1.0 /usr/lib64/packettracer/libdouble-conversion.so.1
 #ln -srf /usr/lib64/packettracer/libjpeg.so.8.2.2 /usr/lib64/packettracer/libjpeg.so.8
-
 #cat > /etc/ld.so.conf.d/cisco-pt7-x86_64.conf <<- LINKER
 #	/usr/lib64/packettracer
 #LINKER
-
 #ldconfig
 
+
+
+echo -e "\e[40;93m--- Copying required libs...\e[0m"
 __OS_VER=$(awk -F= '/^VERSION_ID/ { print $2 }' /etc/os-release | tr -d \" | cut -d. -f1)
 __CWD=$(dirname $BASH_SOURCE)
+
 cp $__CWD/lib/libjpeg.so.8.2.2 $instdir/pt/bin/
 ln -srf $instdir/pt/bin/libjpeg.so.8.2.2 $instdir/pt/bin/libjpeg.so.8
+
 cp $__CWD/lib/libdouble-conversion.so.1.0 $instdir/pt/bin/
 ln -srf $instdir/pt/bin/libdouble-conversion.so.1.0 $instdir/pt/bin/libdouble-conversion.so.1
 
-if [ $__OS_VER -eq 7 ]; then
-	cp $__CWD/lib/libpng16.so.16.34.0 $instdir/pt/bin/
-	ln -srf $instdir/pt/bin/libpng16.so.16.34.0 $instdir/pt/bin/libpng16.so.16
-fi
+#if [ $__OS_VER -eq 7 ]; then
+#	cp $__CWD/lib/libpng16.so.16.34.0 $instdir/pt/bin/
+#	ln -srf $instdir/pt/bin/libpng16.so.16.34.0 $instdir/pt/bin/libpng16.so.16
+#fi
+
+unset instdir0 instdir __OS_VER __CWD
 
 #/opt/pt/
 #/usr/local/bin/packettracer
