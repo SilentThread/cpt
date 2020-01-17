@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 if [ $UID -ne 0 ]; then
 	echo -e "\e[40;95m--- run with a root privilege\e[0m"
 	exit
@@ -30,7 +31,7 @@ echo -e "\e[40;36m--- using $instdir\e[0m"
 
 echo -e "\e[40;93m--- Unpacking...\e[0m"
 tar -axf $1 -P -C $instdir || exit 1
-# gtk-update-icon-cache /usr/share/icons/hicolori
+# gtk-update-icon-cache /usr/share/icons/hicolor
 
 
 
@@ -65,14 +66,14 @@ CPT-SA
 update-desktop-database /usr/share/applications
 ln -sf $instdir/pt/packettracer /usr/local/bin/packettracer
 
-#mkdir -p /usr/lib64/packettracer
-#cp $(dirname $BASH_SOURCE)/lib/* /usr/lib64/packettracer/
-#ln -srf /usr/lib64/packettracer/libdouble-conversion.so.1.0 /usr/lib64/packettracer/libdouble-conversion.so.1
-#ln -srf /usr/lib64/packettracer/libjpeg.so.8.2.2 /usr/lib64/packettracer/libjpeg.so.8
-#cat > /etc/ld.so.conf.d/cisco-pt7-x86_64.conf <<- LINKER
-#	/usr/lib64/packettracer
-#LINKER
-#ldconfig
+# mkdir -p /usr/lib64/packettracer
+# cp $(dirname $BASH_SOURCE)/lib/* /usr/lib64/packettracer/
+# ln -srf /usr/lib64/packettracer/libdouble-conversion.so.1.0 /usr/lib64/packettracer/libdouble-conversion.so.1
+# ln -srf /usr/lib64/packettracer/libjpeg.so.8.2.2 /usr/lib64/packettracer/libjpeg.so.8
+# cat > /etc/ld.so.conf.d/cisco-pt7-x86_64.conf <<- LINKER
+# 	/usr/lib64/packettracer
+# LINKER
+# ldconfig
 
 
 
@@ -86,10 +87,6 @@ ln -srf $instdir/pt/bin/libjpeg.so.8.2.2 $instdir/pt/bin/libjpeg.so.8
 cp $__CWD/lib/libdouble-conversion.so.1.0 $instdir/pt/bin/
 ln -srf $instdir/pt/bin/libdouble-conversion.so.1.0 $instdir/pt/bin/libdouble-conversion.so.1
 
-#if [ $__OS_VER -eq 7 ]; then
-#	cp $__CWD/lib/libpng16.so.16.34.0 $instdir/pt/bin/
-#	ln -srf $instdir/pt/bin/libpng16.so.16.34.0 $instdir/pt/bin/libpng16.so.16
-#fi
 
 unset instdir0 instdir __OS_VER __CWD
 
