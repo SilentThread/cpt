@@ -6,7 +6,10 @@ if [ $UID -ne 0 ]; then
 	exit
 fi
 
-if [ ! -f "$1" ]; then
+if [ -f "$1" ]; then
+	src_pkg="$1"
+else
+	find -maxdepthi 1 -type f \( -iname '*\.tar' -o -iname '*\.tar\.*' \) -exec basename {} \;
 	echo -e "\e[40;96m--- can not find an install archive. (try \"[sudo] ./install.sh ARCHIVE_FILE]\")"
 	exit
 fi
@@ -30,7 +33,7 @@ echo -e "\e[40;36m--- using $instdir\e[0m"
 
 
 echo -e "\e[40;93m--- Unpacking...\e[0m"
-tar -axf $1 -P -C $instdir || exit 1
+tar -axf "$src_pkg" -P -C $instdir || exit 1
 # gtk-update-icon-cache /usr/share/icons/hicolor
 
 
@@ -88,7 +91,7 @@ cp $__CWD/lib/libdouble-conversion.so.1.0 $instdir/pt/bin/
 ln -srf $instdir/pt/bin/libdouble-conversion.so.1.0 $instdir/pt/bin/libdouble-conversion.so.1
 
 
-unset instdir0 instdir __OS_VER __CWD
+unset instdir0 instdir src_pkg __OS_VER __CWD
 
 #/opt/pt/
 #/usr/local/bin/packettracer
