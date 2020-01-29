@@ -6,12 +6,16 @@ if [ $UID -ne 0 ]; then
 	exit
 fi
 
+cd $(dirname $BASH_SOURCE)
+
 if [ -f "$1" ]; then
 	src_pkg="$1"
 else
-	find -maxdepthi 1 -type f \( -iname '*\.tar' -o -iname '*\.tar\.*' \) -exec basename {} \;
-	echo -e "\e[40;96m--- can not find an install archive. (try \"[sudo] ./install.sh ARCHIVE_FILE]\")"
-	exit
+	src_pkg=$(find -maxdepth 1 -type f \( -iname '*\.tar' -o -iname '*\.tar\.*' \) -exec basename {} \;)
+	if [ -z "$src_pkg" ]; then
+		echo -e "\e[40;96m--- can not find an install archive. (try \"[sudo] ./install.sh ARCHIVE_FILE]\")"
+		exit
+	fi
 fi
 
 
@@ -70,7 +74,7 @@ update-desktop-database /usr/share/applications
 ln -sf $instdir/pt/packettracer /usr/local/bin/packettracer
 
 # mkdir -p /usr/lib64/packettracer
-# cp $(dirname $BASH_SOURCE)/lib/* /usr/lib64/packettracer/
+# cp lib/* /usr/lib64/packettracer/
 # ln -srf /usr/lib64/packettracer/libdouble-conversion.so.1.0 /usr/lib64/packettracer/libdouble-conversion.so.1
 # ln -srf /usr/lib64/packettracer/libjpeg.so.8.2.2 /usr/lib64/packettracer/libjpeg.so.8
 # cat > /etc/ld.so.conf.d/cisco-pt7-x86_64.conf <<- LINKER
@@ -81,17 +85,16 @@ ln -sf $instdir/pt/packettracer /usr/local/bin/packettracer
 
 
 echo -e "\e[40;93m--- Copying required libs...\e[0m"
-__OS_VER=$(awk -F= '/^VERSION_ID/ { print $2 }' /etc/os-release | tr -d \" | cut -d. -f1)
-__CWD=$(dirname $BASH_SOURCE)
+#__OS_VER=$(awk -F= '/^VERSION_ID/ { print $2 }' /etc/os-release | tr -d \" | cut -d. -f1)
 
-cp $__CWD/lib/libjpeg.so.8.2.2 $instdir/pt/bin/
+cp lib/libjpeg.so.8.2.2 $instdir/pt/bin/
 ln -srf $instdir/pt/bin/libjpeg.so.8.2.2 $instdir/pt/bin/libjpeg.so.8
 
-cp $__CWD/lib/libdouble-conversion.so.1.0 $instdir/pt/bin/
+cp lib/libdouble-conversion.so.1.0 $instdir/pt/bin/
 ln -srf $instdir/pt/bin/libdouble-conversion.so.1.0 $instdir/pt/bin/libdouble-conversion.so.1
 
 
-unset instdir0 instdir src_pkg __OS_VER __CWD
+unset instdir0 instdir src_pkg
 
 #/opt/pt/
 #/usr/local/bin/packettracer
